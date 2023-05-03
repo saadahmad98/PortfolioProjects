@@ -1,6 +1,6 @@
 -- Data records are between February 24th, 2020 To April 30th, 2021
 
-Select *
+SELECT *
 FROM PortfolioProject..CovidDeaths
 WHERE continent is not null
 ORDER BY 3,4
