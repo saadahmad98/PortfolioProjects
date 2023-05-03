@@ -4,161 +4,135 @@ Cleaning Data in SQL Queries
 
 */
 
--- Format the spacing and the Capitalization on queries
-
-Select *
-from PortfolioProject..nashvillehousing
+SELECT *
+FROM PortfolioProject..nashvillehousing
 
 ----------------------------------------------------------------------------------------------------------------------------
-
 -- Standardize Date Format
 
-alter table nashvillehousing
-add saledateconverted date;
+ALTER TABLE nashvillehousing
+ADD saledateconverted date;
 
-update nashvillehousing
-set saledateconverted = convert(date, saledate)
+UPDATE nashvillehousing
+SET saledateconverted = CONVERT(date, saledate)
 
-Select saledateconverted, convert(date, saledate)
-from PortfolioProject..nashvillehousing
-
--- format this part later and add the change variable transaction code to alter the current table instead of adding a new one
--- delete the newly added column
-
+SELECT saledateconverted, CONVERT(date, saledate)
+FROM PortfolioProject..nashvillehousing
 
 ----------------------------------------------------------------------------------------------------------------------------
-
 -- Populate Property Address Data
 
-Select *
-from PortfolioProject..nashvillehousing
+SELECT *
+FROM PortfolioProject..nashvillehousing
 --where propertyaddress is null
-order by ParcelID
+ORDER BY ParcelID
 
 
-Select a.parcelid, a.propertyaddress, b.parcelid, b.propertyaddress, isnull (a.propertyaddress, b.propertyaddress)
-from PortfolioProject..nashvillehousing as a 
-join PortfolioProject..nashvillehousing as b
-	on a.parcelid = b.parcelid
-	and a.[uniqueid] <> b.[uniqueid]
-where a.propertyaddress is null
+SELECT a.parcelid, a.propertyaddress, b.parcelid, b.propertyaddress, ISNULL (a.propertyaddress, b.propertyaddress)
+FROM PortfolioProject..nashvillehousing AS a 
+JOIN PortfolioProject..nashvillehousing AS b
+	ON a.parcelid = b.parcelid
+	AND a.[uniqueid] <> b.[uniqueid]
+WHERE a.propertyaddress IS NULL 
 
 
-update a
-set propertyaddress = isnull (a.propertyaddress, b.propertyaddress)
-from PortfolioProject..nashvillehousing as a 
-join PortfolioProject..nashvillehousing as b
-	on a.parcelid = b.parcelid
-	and a.[uniqueid] <> b.[uniqueid]
-where a.propertyaddress is null
-
-
-
-
+UPDATE a
+SET propertyaddress = ISNULL (a.propertyaddress, b.propertyaddress)
+FROM PortfolioProject..nashvillehousing AS a 
+JOIN PortfolioProject..nashvillehousing AS b
+	ON a.parcelid = b.parcelid
+	AND a.[uniqueid] <> b.[uniqueid]
+WHERE a.propertyaddress IS NULL
 
 ----------------------------------------------------------------------------------------------------------------------------
-
 -- Breaking out Address into Individual Columns (Address, City, State)
 
-Select PropertyAddress
-from PortfolioProject..nashvillehousing
+SELECT PropertyAddress
+FROM PortfolioProject..nashvillehousing
 
-select 
-substring(propertyaddress, 1, charindex(',', propertyaddress) -1) as address,
-substring(propertyaddress, charindex(',', propertyaddress) +1, len(propertyaddress)) as address
-from portfolioproject..nashvillehousing
-
-
-alter table nashvillehousing
-add PropertySplitAddress nvarchar(255);
-
-update nashvillehousing
-set PropertySplitAddress = substring(propertyaddress, 1, charindex(',', propertyaddress) -1)
-
-alter table nashvillehousing
-add PropertySplitCity nvarchar(255);
-
-update nashvillehousing
-set PropertySplitCity = substring(propertyaddress, charindex(',', propertyaddress) +1, len(propertyaddress))
+SELECT 
+SUBSTRING(propertyaddress, 1, CHARINDEX(',', propertyaddress) -1) AS address,
+SUBSTRING(propertyaddress, CHARINDEX(',', propertyaddress) +1, LEN(propertyaddress)) AS address
+FROM portfolioproject..nashvillehousing
 
 
-select *
-from PortfolioProject..nashvillehousing
+ALTER TABLE nashvillehousing
+ADD PropertySplitAddress NVARCHAR(255);
+
+UPDATE nashvillehousing
+SET PropertySplitAddress = SUBSTRING(propertyaddress, 1, CHARINDEX(',', propertyaddress) -1)
+
+ALTER TABLE nashvillehousing
+ADD PropertySplitCity NVARCHAR(255);
+
+UPDATE nashvillehousing
+SET PropertySplitCity = SUBSTRING(propertyaddress, CHARINDEX(',', propertyaddress) +1, LEN(propertyaddress))
 
 
+SELECT *
+FROM PortfolioProject..nashvillehousing
+
+SELECT owneraddress
+FROM PortfolioProject..nashvillehousing
 
 
-select owneraddress
-from PortfolioProject..nashvillehousing
+SELECT
+PARSENAME(Replace(owneraddress, ',', '.'), 3),
+PARSENAME(Replace(owneraddress, ',', '.'), 2),
+PARSENAME(Replace(owneraddress, ',', '.'), 1)
+FROM PortfolioProject..nashvillehousing
 
 
-select
-parsename(Replace(owneraddress, ',', '.'), 3),
-parsename(Replace(owneraddress, ',', '.'), 2),
-parsename(Replace(owneraddress, ',', '.'), 1)
-from PortfolioProject..nashvillehousing
+ALTER TABLE nashvillehousing
+ADD OwnerSplitAddress NVARCHAR(255);
+
+UPDATE nashvillehousing
+SET OwnerSplitAddress = PARSENAME(Replace(owneraddress, ',', '.'), 3)
+
+ALTER TABLE nashvillehousing
+ADD OwnerSplitCity NVARCHAR(255);
+
+UPDATE nashvillehousing
+SET OwnerSplitCity = PARSENAME(Replace(owneraddress, ',', '.'), 2)
+
+ALTER TABLE nashvillehousing
+ADD OwnerSplitState NVARCHAR(255);
+
+UPDATE nashvillehousing
+SET OwnerSplitState = PARSENAME(Replace(owneraddress, ',', '.'), 1)
 
 
-
-alter table nashvillehousing
-add OwnerSplitAddress nvarchar(255);
-
-update nashvillehousing
-set OwnerSplitAddress = parsename(Replace(owneraddress, ',', '.'), 3)
-
-alter table nashvillehousing
-add OwnerSplitCity nvarchar(255);
-
-update nashvillehousing
-set OwnerSplitCity = parsename(Replace(owneraddress, ',', '.'), 2)
-
-alter table nashvillehousing
-add OwnerSplitState nvarchar(255);
-
-update nashvillehousing
-set OwnerSplitState = parsename(Replace(owneraddress, ',', '.'), 1)
-
-
-select *
-from PortfolioProject..nashvillehousing
-
-
-
--- clean up query by removing the excess select * statements
-
+SELECT *
+FROM PortfolioProject..nashvillehousing
 
 ----------------------------------------------------------------------------------------------------------------------------
-
 -- Change Y and N to Yes and No in "Sold as Vacant" field
 
-Select Distinct(SoldAsVacant), Count(SoldAsVacant)
-From PortfolioProject..NashvilleHousing
-Group By soldasvacant
-order by 2
+SELECT DISTINCT(SoldAsVacant), COUNT(SoldAsVacant)
+FROM PortfolioProject..NashvilleHousing
+GROUP BY soldasvacant
+ORDER BY 2
 
+SELECT soldasvacant,
+CASE WHEN SoldAsVacant = 'Y' THEN 'Yes'
+	 WHEN SoldAsVacant = 'N' THEN 'No'
+	 ELSE SoldAsVacant
+	 END
+FROM PortfolioProject..nashvillehousing
 
-select soldasvacant,
-case when SoldAsVacant = 'Y' then 'Yes'
-	 when SoldAsVacant = 'N' then 'No'
-	 Else SoldAsVacant
-	 End
-from PortfolioProject..nashvillehousing
-
-Update NashvilleHousing
-set soldasvacant = case when SoldAsVacant = 'Y' then 'Yes'
-	 when SoldAsVacant = 'N' then 'No'
-	 Else SoldAsVacant
-	 End
-
+UPDATE NashvilleHousing
+SET soldasvacant = CASE WHEN SoldAsVacant = 'Y' THEN 'Yes'
+	 WHEN SoldAsVacant = 'N' THEN 'No'
+	 ELSE SoldAsVacant
+	 END
 
 ----------------------------------------------------------------------------------------------------------------------------
-
 -- Remove Duplicates
 
-With RowNumCTE as (
-select *,
-	Row_Number() over(
-	partition by ParcelID,
+WITH RowNumCTE AS (
+SELECT *,
+	Row_Number() OVER(
+	PARTITION BY ParcelID,
 				 PropertyAddress,
 				 SaleDate,
 				 SalePrice,
@@ -166,43 +140,27 @@ select *,
 				 ORDER BY
 					UniqueID
 					) row_num	
-from PortfolioProject..nashvillehousing
+FROM PortfolioProject..nashvillehousing
 )
---Delete
---From RowNumCTE
---where row_num > 1
 
-Select *
-From RowNumCTE
-where row_num > 1
-order by propertyaddress
+SELECT *
+FROM RowNumCTE
+WHERE row_num > 1
+ORDER BY propertyaddress
 
 
-
-
-select *
-from PortfolioProject..nashvillehousing
-
-
+SELECT *
+FROM PortfolioProject..nashvillehousing
 
 ----------------------------------------------------------------------------------------------------------------------------
-
 -- Delete Unused Columns 
 
+SELECT *
+FROM PortfolioProject..nashvillehousing
 
-select *
-from PortfolioProject..nashvillehousing
+ALTER TABLE PortfolioProject..nashvillehousing
+DROP COLUMN OwnerAddress, TaxDistrict, PropertyAddress
 
-Alter Table PortfolioProject..nashvillehousing
-Drop Column OwnerAddress, TaxDistrict, PropertyAddress
-
-Alter Table PortfolioProject..nashvillehousing
-Drop Column SaleDate
-
---Format this by adding Sale date to the orignal query
-
-
-
-
-
+ALTER TABLE PortfolioProject..nashvillehousing
+DROP COLUMN SaleDate
 
