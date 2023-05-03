@@ -160,7 +160,7 @@ FROM PortfolioProject..CovidDeaths AS DEA
 JOIN PortfolioProject..CovidVaccinations AS VAC
 	ON dea.location = vac.location
 	AND dea.date = vac.date
-WHERE dea.continent is not null
+WHERE dea.continent IS NOT NULL
 
 
 SELECT * 
